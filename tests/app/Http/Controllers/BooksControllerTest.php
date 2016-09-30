@@ -7,7 +7,7 @@ use TestCase;
 class BooksControllerTest extends TestCase
 {
     /** @test **/
-    public function indexStatusCodeShouldBe200()
+    public function index_status_code_should_be_200()
     {
         $response = $this->call('GET', '/books');
 
@@ -17,7 +17,7 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function index_should_return_a_collection_of_records()
     {
-        $this->json('GET', '/books')
+        $this->get('/books')
             ->seeJson([
                 'title' => 'War of the Worlds',
             ])
@@ -30,7 +30,7 @@ class BooksControllerTest extends TestCase
     public function show_should_return_a_valid_book()
     {
         $this
-            ->json('GET', '/books/1')
+            ->get('/books/1')
             ->seeStatusCode(200)
             ->seeJson([
                 'id' => 1,
