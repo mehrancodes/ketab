@@ -21,3 +21,4 @@ $app->get('/books/{id:[\d]+}', [
     'uses' => 'BooksController@show'
 ]);
 $app->post('/books', 'BooksController@store');
+$app->put('/books/{id:[\d]+}', 'BooksController@update');
