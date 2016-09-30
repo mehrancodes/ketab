@@ -16,4 +16,8 @@ $app->get('/', function () use ($app) {
 });
 
 $app->get('/books', 'BooksController@index');
-$app->get('/books/{id:[\d]+}', 'BooksController@show');
+$app->get('/books/{id:[\d]+}', [
+    'as' => 'books.show',
+    'uses' => 'BooksController@show'
+]);
+$app->post('/books', 'BooksController@store');
