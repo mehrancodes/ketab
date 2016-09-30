@@ -14,3 +14,6 @@
 $app->get('/', function () use ($app) {
     return $app->version();
 });
+
+$app->get('/books', 'BooksController@index');
+$app->get('/books/{id:[\d]+}', 'BooksController@show');
