@@ -27,15 +27,7 @@ class BooksController
      */
     public function show($id)
     {
-        try {
-            return book::findOrFail($id);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'error' => [
-                    'message' => 'Book not found'
-                ]
-            ], 404);
-        }
+        return book::findOrFail($id);
     }
 
     /**
