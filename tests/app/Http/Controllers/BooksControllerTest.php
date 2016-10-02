@@ -23,10 +23,11 @@ class BooksControllerTest extends TestCase
         $books = factory(Book::class, 2)->create();
 
         $this->get('/books');
+        $expected = [
+            'data' => $books->toArray()
+        ];
 
-        foreach ($books as $book) {
-            $this->seeJson(['title' => $book->title]);
-        }
+        $this->seeJsonEquals($expected);
     }
 
     /** @test **/
@@ -34,18 +35,13 @@ class BooksControllerTest extends TestCase
     {
         $book = factory(Book::class)->create();
 
+        $expected = [
+            'data' => $book->toArray()
+        ];
         $this
             ->get("/books/{$book->id}")
             ->seeStatusCode(200)
-            ->seeJson([
-                'id' => $book->id,
-                'title' => $book->title,
-                'description' => $book->description,
-                'author' => $book->author
-            ]);
-        $data = json_decode($this->response->getContent(), true);
-        $this->assertArrayHasKey('created_at', $data);
-        $this->assertArrayHasKey('updated_at', $data);
+            ->seeJson($expected);
     }
 
     /** @test **/
@@ -82,9 +78,16 @@ class BooksControllerTest extends TestCase
             'author' => 'H. G. Wells'
         ]);
 
-        $this
-            ->seeJson(['created' => true])
-            ->seeInDatabase('books', ['title' => 'The Invisible Man']);
+        $body = json_decode($this->response->getContent(), true);
+        $this->assertArrayHasKey('data', $body);
+
+        $data = $body['data'];
+        $this->assertEquals('The Invisible Man', $data['title']);
+        $this->assertEquals('An invisible man is trapped in the terror of his own creation', $data['description']);
+        $this->assertEquals('H. G. Wells', $data['author']);
+        $this->assertTrue($data['id'] > 0, 'Expected a positive integer, but did not see one.');
+        $this->seeInDatabase('books', ['title' => 'The Invisible Man']);
+
     }
 
     /** @test */
@@ -127,6 +130,9 @@ class BooksControllerTest extends TestCase
             ->seeInDatabase('books', [
                 'title' => 'The War of the Worlds'
             ]);
+
+        $body = json_decode($this->response->getContent(), true);
+        $this->assertArrayHasKey('data', $body);
     }
 
     /** @test **/
