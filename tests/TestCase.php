@@ -47,4 +47,28 @@ class TestCase extends Laravel\Lumen\Testing\TestCase
             );
         return $this;
     }
+
+    /**
+     * Convenience method for creating a book with an author
+     *
+     * @param int $count
+     * @return mixed
+     */
+    protected function bookFactory($count = 1)
+    {
+        $author = factory(\App\Author::class)->create();
+        $books = factory(\App\Book::class, $count)->make();
+
+        if ($count === 1) {
+            $books->author()->associate($author);
+            $books->save();
+        } else {
+            foreach ($books as $book) {
+                $book->author()->associate($author);
+                $book->save();
+            }
+        }
+
+        return $books;
+    }
 }

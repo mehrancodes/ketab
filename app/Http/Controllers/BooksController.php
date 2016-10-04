@@ -42,12 +42,13 @@ class BooksController extends Controller
         $this->validate($request, [
             'title' => 'required|max:255',
             'description' => 'required',
-            'author' => 'required',
+            'author_id' => 'required|exists:authors,id',
         ], [
             'description.required' => 'Please fill out the :attribute.'
         ]);
 
         $book = Book::create($request->all());
+
         $data = $this->item($book, new BookTransformer());
 
         return response()->json($data, 201, [
@@ -75,7 +76,7 @@ class BooksController extends Controller
         $this->validate($request, [
             'title' => 'required|max:255',
             'description' => 'required',
-            'author' => 'required'
+            'author_id' => 'exists:authors,id'
         ], [
             'description.required' => 'Please fill out the :attribute.'
         ]);

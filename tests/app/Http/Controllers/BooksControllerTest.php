@@ -1,7 +1,7 @@
 <?php
 namespace Tests\App\Http\Controllers;
 
-use App\Book;
+use App\Author;
 use Carbon\Carbon;
 use Laravel\Lumen\Testing\DatabaseMigrations;
 use TestCase;
@@ -35,11 +35,12 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function index_should_return_a_collection_of_records()
     {
-        $books = factory(Book::class, 2)->create();
+        $books = $this->bookFactory(2);
 
         $this->get('/books');
 
         $content = json_decode($this->response->getContent(), true);
+
         $this->assertArrayHasKey('data', $content);
 
         foreach ($books as $book) {
@@ -47,7 +48,7 @@ class BooksControllerTest extends TestCase
                 'id' => $book->id,
                 'title' => $book->title,
                 'description' => $book->description,
-                'author' => $book->author,
+                'author' => $book->author->name,
                 'created' => $book->created_at->toIso8601String(),
                 'updated' => $book->updated_at->toIso8601String(),
                 'released' => $book->created_at->diffForHumans(),
@@ -58,7 +59,7 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function show_should_return_a_valid_book()
     {
-        $book = factory(Book::class)->create();
+        $book = $this->bookFactory();
 
         $this
             ->get("/books/{$book->id}")
@@ -73,7 +74,7 @@ class BooksControllerTest extends TestCase
         $this->assertEquals($book->id, $data['id']);
         $this->assertEquals($book->title, $data['title']);
         $this->assertEquals($book->description, $data['description']);
-        $this->assertEquals($book->author, $data['author']);
+        $this->assertEquals($book->author->name, $data['author']);
         $this->assertEquals($book->created_at->toIso8601String(), $data['created']);
         $this->assertEquals($book->updated_at->toIso8601String(), $data['created']);
     }
@@ -106,13 +107,18 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function store_should_save_new_book_in_the_database()
     {
+        $author = factory(Author::class)->create([
+            'name' => 'H. G. Wells'
+        ]);
+
         $this->post('/books', [
             'title' => 'The Invisible Man',
             'description' => 'An invisible man is trapped in the terror of his own creation',
-            'author' => 'H. G. Wells'
+            'author_id' => $author->id
         ]);
 
         $body = json_decode($this->response->getContent(), true);
+
         $this->assertArrayHasKey('data', $body);
 
         $data = $body['data'];
@@ -122,10 +128,7 @@ class BooksControllerTest extends TestCase
             $data['description']
         );
         $this->assertEquals('H. G. Wells', $data['author']);
-        $this->assertTrue(
-            $data['id'] > 0,
-            'Expected a positive integer, but did not see one.'
-        );
+        $this->assertTrue($data['id'] > 0, 'Expected a positive integer, but did not see one.');
 
         $this->assertArrayHasKey('created', $data);
         $this->assertEquals(Carbon::now()->toIso8601String(), $data['created']);
@@ -134,17 +137,19 @@ class BooksControllerTest extends TestCase
         $this->assertArrayHasKey('released', $data);
         $this->assertEquals(Carbon::now()->diffForHumans(), $data['released']);
         $this->seeInDatabase('books', ['title' => 'The Invisible Man']);
-
     }
 
     /** @test */
     public function store_should_respond_with_a_201_and_location_header_when_successful()
     {
-        $this->post('/books', [
+        $author = factory(Author::class)->create();
+
+        $this->json('POST', '/books', [
             'title' => 'The Invisible Man',
             'description' => 'An invisible man is trapped in the terror of his own creation',
-            'author' => 'H. G. Wells'
+            'author_id' => $author->id
         ]);
+
         $this
             ->seeStatusCode(201)
             ->seeHeaderWithRegExp('Location', '#/books/[\d]+$#');
@@ -153,17 +158,17 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function update_should_only_change_fillable_fields()
     {
-        $book = factory(Book::class)->create([
-            'title' => 'War of the Worlds',
-            'description' => 'A science fiction masterpiece about Martians invading London',
-            'author' => 'H. G. Wells',
+        $book = $this->bookFactory();
+
+        $this->notSeeInDatabase('books', [
+            'title' => 'The War of the Worlds',
+            'description' => 'The book is way better than the movie.',
         ]);
 
         $this->put("/books/{$book->id}", [
             'id' => 5,
             'title' => 'The War of the Worlds',
-            'description' => 'The book is way better than the movie.',
-            'author' => 'Wells, H. G.'
+            'description' => 'The book is way better than the movie.'
         ]);
 
         $this
@@ -171,8 +176,7 @@ class BooksControllerTest extends TestCase
             ->seeJson([
                 'id' => 1,
                 'title' => 'The War of the Worlds',
-                'description' => 'The book is way better than the movie.',
-                'author' => 'Wells, H. G.'
+                'description' => 'The book is way better than the movie.'
             ])
             ->seeInDatabase('books', [
                 'title' => 'The War of the Worlds'
@@ -212,7 +216,9 @@ class BooksControllerTest extends TestCase
     /** @test **/
     public function destroy_should_remove_a_valid_book()
     {
-        $book = factory('App\Book')->create();
+        $book = $this->bookFactory();
+
+
         $this
             ->delete("/books/{$book->id}")
             ->seeStatusCode(204)
