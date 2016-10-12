@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Author extends Model
 {
+    use Rateable;
+
     /**
      * The attributes that are mass assignable
      *

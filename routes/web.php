@@ -36,6 +36,10 @@ $app->group([
         ]);
         $app->put('/{id:[\d]+}', 'AuthorsController@update');
         $app->delete('/{id:[\d]+}', 'AuthorsController@destroy');
+
+        // Author ratings
+        $app->post('/{id:[\d]+}/ratings', 'AuthorsRatingsController@store');
+        $app->delete('/{authorId:[\d]+}/ratings/{ratingId:[\d]+}', 'AuthorsRatingsController@destroy');
     });
 
 $app->group([

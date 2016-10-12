@@ -78,11 +78,11 @@ $app->singleton(
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
+ $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
-$app->register(\App\Providers\FractalServiceProvider::class);
+ $app->register(\App\Providers\FractalServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -95,8 +95,8 @@ $app->register(\App\Providers\FractalServiceProvider::class);
 |
 */
 
-$app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
-    require __DIR__.'/../routes/web.php';
-});
+ $app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
+     require __DIR__.'/../routes/web.php';
+ });
 
-return $app;
+    return $app;
