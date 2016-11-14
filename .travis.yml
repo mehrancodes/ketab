@@ -6,8 +6,10 @@ php:
   - 7.1
 
 before_script:
-  - cp .env.example .env
-  - travis_retry composer install --no-interaction --no-scripts --prefer-source --no-suggest
-  
+  - cp .env.travis .env
+  - mysql -e "Create database for travis;"
+  - travis_retry composer self-update
+  - composer install --no-interaction --no-scripts --prefer-source --no-suggest
+
 script:
 - phpunit
