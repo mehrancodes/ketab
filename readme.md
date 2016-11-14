@@ -9,7 +9,7 @@ Ketab is a REST API written in Lumen for learning purposes.
 git clone https://github.com/mehranrasulian/ketab.git  
 composer install  
 cp .env.example .env  
-php artisan migrate --seed=DatabaseSeeder
+php artisan migrate --seed
 
 Now it's ready to use!
 
