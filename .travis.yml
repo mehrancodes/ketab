@@ -6,8 +6,8 @@ php:
   - 7.1
 
 before_script:
-  - travis_retry composer self-update
-  - composer install
-
+  - cp .env.example .env
+  - travis_retry composer install --no-interaction --no-scripts --prefer-source --no-suggest
+  
 script:
-  - phpunit
+- phpunit
